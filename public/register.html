@@ -1,0 +1,91 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+    <title>VoteSphere — Register</title>
+    <link rel="stylesheet" href="/css/style.css"/>
+</head>
+<body>
+    <div class="orb orb-1"></div>
+    <div class="orb orb-2"></div>
+
+    <div class="auth-wrapper">
+        <div class="auth-card">
+            <div class="brand">
+                <div class="brand-icon">🗳️</div>
+                <h1>Create Account</h1>
+                <p>Join VoteSphere and make your vote count</p>
+            </div>
+
+            <div class="form-group">
+                <label for="username">Full Name</label>
+                <input type="text" id="username" placeholder="John Doe"/>
+            </div>
+
+            <div class="form-group">
+                <label for="email">Email Address</label>
+                <input type="email" id="email" placeholder="you@example.com"/>
+            </div>
+
+            <div class="form-group">
+                <label for="password">Password</label>
+                <input type="password" id="password" placeholder="Choose a password"/>
+            </div>
+
+            <button class="btn btn-primary" onclick="register()">Create Account →</button>
+
+            <div class="alert alert-success" id="alertSuccess"></div>
+            <div class="alert alert-error"   id="alertError"></div>
+
+            <div class="divider">or</div>
+
+            <div class="auth-footer">
+                Already have an account? <a href="/">Sign in</a>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        async function register() {
+            const username = document.getElementById('username').value.trim();
+            const email    = document.getElementById('email').value.trim();
+            const password = document.getElementById('password').value;
+            const ok  = document.getElementById('alertSuccess');
+            const err = document.getElementById('alertError');
+
+            ok.style.display = 'none';
+            err.style.display = 'none';
+
+            if (!username || !email || !password) {
+                err.textContent = 'Please fill in all fields.';
+                err.style.display = 'block';
+                return;
+            }
+
+            try {
+                const res  = await fetch('/register', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ username, email, password })
+                });
+                const data = await res.json();
+
+                if (data.success) {
+                    ok.textContent = 'Account created! Redirecting to login…';
+                    ok.style.display = 'block';
+                    setTimeout(() => window.location.href = '/', 1200);
+                } else {
+                    err.textContent = data.error || 'Registration failed.';
+                    err.style.display = 'block';
+                }
+            } catch {
+                err.textContent = 'Server error. Please try again.';
+                err.style.display = 'block';
+            }
+        }
+
+        document.addEventListener('keydown', e => { if (e.key === 'Enter') register(); });
+    </script>
+</body>
+</html>

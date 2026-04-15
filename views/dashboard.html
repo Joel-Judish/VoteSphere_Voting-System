@@ -1,0 +1,227 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+    <title>VoteSphere — Dashboard</title>
+    <link rel="stylesheet" href="/css/style.css"/>
+</head>
+<body>
+    <div class="orb orb-1"></div>
+    <div class="orb orb-2"></div>
+
+    <div class="layout">
+        <!-- Sidebar -->
+        <aside class="sidebar">
+            <div class="sidebar-brand">
+                <div class="icon">🗳️</div>
+                <span>VoteSphere</span>
+            </div>
+
+            <nav>
+                <a class="nav-item active" onclick="showSection('vote')">
+                    <span class="icon">🗳️</span> Cast Vote
+                </a>
+                <a class="nav-item" onclick="showSection('results')">
+                    <span class="icon">📊</span> Results
+                </a>
+                <a class="nav-item" onclick="showSection('profile')">
+                    <span class="icon">👤</span> My Profile
+                </a>
+            </nav>
+
+            <div class="sidebar-footer">
+                <div class="user-badge">
+                    <div class="user-avatar" id="avatarInitial">?</div>
+                    <div class="user-info">
+                        <div class="name" id="sidebarName">Loading…</div>
+                        <div class="role">Voter</div>
+                    </div>
+                </div>
+                <a class="nav-item" href="/logout">
+                    <span class="icon">🚪</span> Logout
+                </a>
+            </div>
+        </aside>
+
+        <!-- Main -->
+        <main class="main">
+
+            <!-- Cast Vote -->
+            <div class="section active" id="sec-vote">
+                <div class="page-header">
+                    <h2>Cast Your Vote</h2>
+                    <p>Select a candidate below — you can only vote once.</p>
+                </div>
+                <div class="candidates-grid" id="candidatesGrid">
+                    <p style="color:var(--muted)">Loading candidates…</p>
+                </div>
+            </div>
+
+            <!-- Results -->
+            <div class="section" id="sec-results">
+                <div class="page-header">
+                    <h2>Live Results</h2>
+                    <p>Current vote standings across all candidates.</p>
+                </div>
+                <div class="card">
+                    <div class="card-header">
+                        <span class="card-title">Vote Count</span>
+                        <button class="btn btn-sm" onclick="loadResults()">↺ Refresh</button>
+                    </div>
+                    <div id="resultsContainer"><p style="color:var(--muted)">Loading results…</p></div>
+                </div>
+            </div>
+
+            <!-- Profile -->
+            <div class="section" id="sec-profile">
+                <div class="page-header">
+                    <h2>My Profile</h2>
+                    <p>Your account information.</p>
+                </div>
+                <div class="card" style="max-width:440px">
+                    <div style="display:flex;align-items:center;gap:1rem;margin-bottom:1.5rem">
+                        <div class="user-avatar" style="width:60px;height:60px;font-size:1.4rem" id="profileAvatar">?</div>
+                        <div>
+                            <div style="font-size:1.1rem;font-weight:600" id="profileName">—</div>
+                            <div style="font-size:0.82rem;color:var(--accent)">Voter</div>
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label>User ID</label>
+                        <input type="text" id="profileId" readonly/>
+                    </div>
+                    <div class="form-group">
+                        <label>Username</label>
+                        <input type="text" id="profileUsername" readonly/>
+                    </div>
+                </div>
+            </div>
+
+        </main>
+    </div>
+
+    <!-- Toast -->
+    <div class="toast" id="toast"></div>
+
+    <script>
+        let currentUser = null;
+
+        async function init() {
+            try {
+                const res  = await fetch('/api/me');
+                if (!res.ok) return window.location.href = '/';
+                currentUser = await res.json();
+
+                document.getElementById('sidebarName').textContent   = currentUser.username;
+                document.getElementById('profileName').textContent    = currentUser.username;
+                document.getElementById('profileUsername').value =    currentUser.username;
+                document.getElementById('profileId').value            = currentUser.id;
+
+                const initial = currentUser.username.charAt(0).toUpperCase();
+                document.getElementById('avatarInitial').textContent = initial;
+                document.getElementById('profileAvatar').textContent  = initial;
+
+                loadCandidates();
+            } catch {
+                window.location.href = '/';
+            }
+        }
+
+        function showSection(name) {
+            document.querySelectorAll('.section').forEach(s => s.classList.remove('active'));
+            document.getElementById('sec-' + name).classList.add('active');
+            document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
+            event.currentTarget.classList.add('active');
+            if (name === 'results') loadResults();
+        }
+
+        async function loadCandidates() {
+            const grid = document.getElementById('candidatesGrid');
+            try {
+                const res  = await fetch('/api/candidates');
+                const list = await res.json();
+                grid.innerHTML = '';
+                list.forEach(c => {
+                    const div = document.createElement('div');
+                    div.className = 'candidate-card';
+                    div.innerHTML = `
+                        <div class="candidate-avatar">${c.name.charAt(0)}</div>
+                        <div>
+                            <div class="candidate-name">${c.name}</div>
+                            <div class="candidate-party">${c.party}</div>
+                        </div>
+                        <div class="candidate-desc">${c.description}</div>
+                        <button class="vote-btn" onclick="castVote(${c.id}, this)">Vote for ${c.name.split(' ')[0]}</button>
+                    `;
+                    grid.appendChild(div);
+                });
+            } catch {
+                grid.innerHTML = '<p style="color:var(--danger)">Failed to load candidates.</p>';
+            }
+        }
+
+        async function castVote(candidateId, btn) {
+            btn.disabled = true;
+            btn.textContent = 'Voting…';
+            try {
+                const res  = await fetch('/api/vote', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ candidateId })
+                });
+                const data = await res.json();
+                if (data.success) {
+                    btn.textContent = '✓ Voted!';
+                    btn.style.background = 'rgba(52,211,153,0.2)';
+                    btn.style.color = 'var(--success)';
+                    showToast('✓ Your vote has been recorded!', 'success');
+                } else {
+                    btn.disabled = false;
+                    btn.textContent = 'Vote';
+                    showToast(data.error || 'Vote failed.', 'error');
+                }
+            } catch {
+                btn.disabled = false;
+                btn.textContent = 'Vote';
+                showToast('Server error.', 'error');
+            }
+        }
+
+        async function loadResults() {
+            const container = document.getElementById('resultsContainer');
+            try {
+                const res  = await fetch('/api/results');
+                const list = await res.json();
+                const total = list.reduce((sum, c) => sum + c.votes, 0);
+                container.innerHTML = '';
+                list.forEach(c => {
+                    const pct = total > 0 ? Math.round((c.votes / total) * 100) : 0;
+                    container.innerHTML += `
+                        <div class="result-item">
+                            <div class="result-header">
+                                <span class="cname">${c.name} <span style="color:var(--muted);font-weight:400">(${c.party})</span></span>
+                                <span class="votes-count">${c.votes} votes · ${pct}%</span>
+                            </div>
+                            <div class="progress-bar">
+                                <div class="progress-fill" style="width:${pct}%"></div>
+                            </div>
+                        </div>`;
+                });
+                if (!list.length) container.innerHTML = '<p style="color:var(--muted)">No results yet.</p>';
+            } catch {
+                container.innerHTML = '<p style="color:var(--danger)">Failed to load results.</p>';
+            }
+        }
+
+        function showToast(msg, type) {
+            const t = document.getElementById('toast');
+            t.textContent = msg;
+            t.className = `toast ${type} show`;
+            setTimeout(() => t.classList.remove('show'), 3000);
+        }
+
+        init();
+    </script>
+</body>
+</html>

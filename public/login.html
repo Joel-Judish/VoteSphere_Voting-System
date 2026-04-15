@@ -1,0 +1,87 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+    <title>VoteSphere — Sign In</title>
+    <link rel="stylesheet" href="/css/style.css"/>
+</head>
+<body>
+    <div class="orb orb-1"></div>
+    <div class="orb orb-2"></div>
+
+    <div class="auth-wrapper">
+        <div class="auth-card">
+            <div class="brand">
+                <div class="brand-icon">🗳️</div>
+                <h1>VoteSphere</h1>
+                <p>Secure Online Voting Platform</p>
+            </div>
+
+            <div class="form-group">
+                <label for="email">Email Address</label>
+                <input type="email" id="email" placeholder="you@example.com"/>
+            </div>
+
+            <div class="form-group">
+                <label for="password">Password</label>
+                <input type="password" id="password" placeholder="••••••••"/>
+            </div>
+
+            <button class="btn btn-primary" onclick="login()">Sign In →</button>
+
+            <div class="alert alert-success" id="alertSuccess"></div>
+            <div class="alert alert-error" id="alertError"></div>
+
+            <div class="divider">or</div>
+
+            <div class="auth-footer">
+                Don't have an account? <a href="/register">Create one</a>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        async function login() {
+            const email    = document.getElementById('email').value.trim();
+            const password = document.getElementById('password').value;
+            const ok  = document.getElementById('alertSuccess');
+            const err = document.getElementById('alertError');
+
+            ok.style.display = 'none';
+            err.style.display = 'none';
+
+            if (!email || !password) {
+                err.textContent = 'Please fill in all fields.';
+                err.style.display = 'block';
+                return;
+            }
+
+            try {
+                const res  = await fetch('/login', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ email, password })
+                });
+                const data = await res.json();
+
+                if (data.success) {
+                    ok.textContent = 'Login successful! Redirecting…';
+                    ok.style.display = 'block';
+                    setTimeout(() => {
+                        window.location.href = data.role === 'admin' ? '/admin' : '/dashboard';
+                    }, 700);
+                } else {
+                    err.textContent = data.error || 'Invalid credentials.';
+                    err.style.display = 'block';
+                }
+            } catch {
+                err.textContent = 'Server error. Please try again.';
+                err.style.display = 'block';
+            }
+        }
+
+        document.addEventListener('keydown', e => { if (e.key === 'Enter') login(); });
+    </script>
+</body>
+</html>
