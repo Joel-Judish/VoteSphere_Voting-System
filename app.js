@@ -178,6 +178,7 @@ app.get('/admin', (req, res) => {
 // ──────────────────────────────────────────────
 // AUTHENTICATION ROUTES
 // ──────────────────────────────────────────────
+// Handles user registration and login with secure password hashing
 
 // Register Page
 app.post('/register', (req, res) => {
@@ -217,6 +218,7 @@ app.post('/register', (req, res) => {
 });
 
 // Login Page
+// Login route verifies user credentials using bcrypt comparison
 app.post('/login', (req, res) => {
     const { email, password } = req.body;
 
