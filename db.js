@@ -1,9 +1,10 @@
+// Database connection for VoteSphere Voting System
 const mysql = require('mysql2');
 
 const db = mysql.createConnection({
     host: 'localhost',
     user: 'root',
-    password: 'Joel#2003',         // Change to your MySQL root password
+    password: 'Joel#2003',         // Changed to my MySQL root password
     database: 'voting_db'
 });
 
