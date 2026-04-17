@@ -273,12 +273,15 @@ app.get('/api/candidates', (req, res) => {
 });
 
 // Cast a vote for a candidate
+// Allows authenticated users to cast a vote for a candidate
+// Ensures one user can vote only once
 app.post('/api/vote', (req, res) => {
     if (!req.session.user) return res.status(401).json({ error: 'Not logged in.' });
     const { candidateId } = req.body;
     const userId = req.session.user.id;
 
     // No Duplicate Vote Check - Fixed by checking if the user has already voted before allowing them to cast a vote
+    // Check if user has already voted to prevent duplicate voting
     db.query('SELECT * FROM votes WHERE user_id = ?', [userId], (err, results) => {
         if (err) return res.status(500).json({ error: 'Check failed.' });
 
