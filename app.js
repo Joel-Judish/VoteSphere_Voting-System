@@ -312,6 +312,7 @@ app.get('/api/results', (req, res) => {
 // ──────────────────────────────────────────────
 // ADMIN API ROUTES
 // ──────────────────────────────────────────────
+// Admin can manage users, candidates, and voting results
 
 // Get all users - Admin Only
 app.get('/api/admin/users', (req, res) => {
@@ -323,6 +324,7 @@ app.get('/api/admin/users', (req, res) => {
 });
 
 // Delete user from database - Admin Only
+// Allows admin to delete a user from the system
 app.delete('/api/admin/users/:id', (req, res) => {
     if (!req.session.user || req.session.user.role !== 'admin') return res.status(403).json({ error: 'Forbidden' });
     db.query('DELETE FROM users WHERE id = ?', [req.params.id], (err) => {
@@ -331,6 +333,7 @@ app.delete('/api/admin/users/:id', (req, res) => {
     });
 });
 
+// Admin can add and remove candidates //
 // Add candidate to database - Admin Only
 app.post('/api/admin/candidates', (req, res) => {
     if (!req.session.user || req.session.user.role !== 'admin') return res.status(403).json({ error: 'Forbidden' });
