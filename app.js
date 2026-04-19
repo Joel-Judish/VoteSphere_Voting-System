@@ -143,6 +143,10 @@ app.use(bodyParser.urlencoded({ extended: true }));
 app.use(bodyParser.json());
 app.use(express.static(path.join(__dirname, 'public')));
 
+// ---------------- SESSION SECURITY ----------------
+// Configured secure session handling with httpOnly cookies and SameSite protection
+
+
 // Insecure Session Configuration - Fixed by using an environment variable for the session secret and setting secure cookie options to enhance security
 app.use(session({
     secret: process.env.SESSION_SECRET || 'StrongRandomSecret123!',
