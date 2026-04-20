@@ -150,13 +150,15 @@ app.use(express.static(path.join(__dirname, 'public')));
 // Insecure Session Configuration - Fixed by using an environment variable for the session secret and setting secure cookie options to enhance security
 app.use(session({
     secret: process.env.SESSION_SECRET || 'StrongRandomSecret123!',
+    name: 'vsid',
     resave: false,
     saveUninitialized: false,
     cookie: {
         httpOnly: true,     // prevents JS access (protects from XSS)
         secure: false,      // set true if using HTTPS
         sameSite: 'strict', // prevents CSRF
-        maxAge: 1000 * 60 * 30 // session expires in 30 minutes
+        maxAge: 1000 * 60 * 30, // session expires in 30 minutes
+        expires: new Date(Date.now() + 1000 * 60 * 30) 
     }
 }));
 
