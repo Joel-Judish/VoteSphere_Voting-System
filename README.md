@@ -28,7 +28,6 @@ Both versions can run simultaneously since they use **different ports and differ
 | `main` | ✅ Secure version — all vulnerabilities fixed | 3000 | `voting_db` |
 | `vulnerable-app` | ⚠️ Vulnerable version — for demonstration only | 4000 | `voting_db_vulnerable` |
 
-> 📖 See the [`vulnerable-app` branch README](https://github.com/Joel-Judish/VoteSphere_Voting-System/tree/vulnerable-app) for a full list of vulnerabilities and how to exploit them for demonstration.
 
 ---
 
