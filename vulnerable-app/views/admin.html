@@ -1,0 +1,333 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+    <title>VoteSphere — Admin Panel</title>
+    <link rel="stylesheet" href="/css/style.css"/>
+</head>
+<body>
+    <div class="orb orb-1"></div>
+    <div class="orb orb-2"></div>
+
+    <div class="layout">
+        <!-- Sidebar -->
+        <aside class="sidebar">
+            <div class="sidebar-brand">
+                <div class="icon">🗳️</div>
+                <span>VoteSphere</span>
+            </div>
+
+            <nav>
+                <a class="nav-item active" onclick="showSection('overview', this)">
+                    <span class="icon">📋</span> Overview
+                </a>
+                <a class="nav-item" onclick="showSection('users', this)">
+                    <span class="icon">👥</span> Users
+                </a>
+                <a class="nav-item" onclick="showSection('candidates', this)">
+                    <span class="icon">🏛️</span> Candidates
+                </a>
+                <a class="nav-item" onclick="showSection('results', this)">
+                    <span class="icon">📊</span> Results
+                </a>
+            </nav>
+
+            <div class="sidebar-footer">
+                <div class="user-badge">
+                    <div class="user-avatar">A</div>
+                    <div class="user-info">
+                        <div class="name">Admin</div>
+                        <div class="role" style="color:var(--gold)">Administrator</div>
+                    </div>
+                </div>
+                <a class="nav-item" href="/logout">
+                    <span class="icon">🚪</span> Logout
+                </a>
+            </div>
+        </aside>
+
+        <!-- Main -->
+        <main class="main">
+
+            <!-- Overview -->
+            <div class="section active" id="sec-overview">
+                <div class="page-header">
+                    <h2>Admin Overview</h2>
+                    <p>Monitor the voting system at a glance.</p>
+                </div>
+                <div class="stats-row" id="statsRow">
+                    <div class="stat-card">
+                        <div class="stat-icon blue">👥</div>
+                        <div>
+                            <div class="stat-value" id="statUsers">—</div>
+                            <div class="stat-label">Total Users</div>
+                        </div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-icon purple">🏛️</div>
+                        <div>
+                            <div class="stat-value" id="statCandidates">—</div>
+                            <div class="stat-label">Candidates</div>
+                        </div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-icon gold">🗳️</div>
+                        <div>
+                            <div class="stat-value" id="statVotes">—</div>
+                            <div class="stat-label">Total Votes</div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="card">
+                    <div class="card-header">
+                        <span class="card-title">Quick Results</span>
+                        <button class="btn btn-danger" onclick="resetVotes()">Reset All Votes</button>
+                    </div>
+                    <div id="overviewResults"><p style="color:var(--muted)">Loading…</p></div>
+                </div>
+            </div>
+
+            <!-- Users -->
+            <div class="section" id="sec-users">
+                <div class="page-header">
+                    <h2>Manage Users</h2>
+                    <p>View and remove registered voters.</p>
+                </div>
+                <div class="card">
+                    <div class="table-wrap">
+                        <table>
+                            <thead>
+                                <tr>
+                                    <th>ID</th>
+                                    <th>Username</th>
+                                    <th>Email</th>
+                                    <th>Role</th>
+                                    <th>Joined</th>
+                                    <th>Action</th>
+                                </tr>
+                            </thead>
+                            <tbody id="usersTable"><tr><td colspan="6" style="color:var(--muted)">Loading…</td></tr></tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Candidates -->
+            <div class="section" id="sec-candidates">
+                <div class="page-header">
+                    <h2>Manage Candidates</h2>
+                    <p>Add or remove election candidates.</p>
+                </div>
+
+                <div class="card" style="max-width:520px;margin-bottom:1.5rem">
+                    <div class="card-header"><span class="card-title">Add Candidate</span></div>
+                    <div class="form-group">
+                        <label>Full Name</label>
+                        <input type="text" id="cName" placeholder="e.g. Jane Smith"/>
+                    </div>
+                    <div class="form-group">
+                        <label>Party</label>
+                        <input type="text" id="cParty" placeholder="e.g. Reform Party"/>
+                    </div>
+                    <div class="form-group">
+                        <label>Description</label>
+                        <textarea id="cDesc" placeholder="Brief candidate bio…"></textarea>
+                    </div>
+                    <button class="btn btn-primary" onclick="addCandidate()">Add Candidate</button>
+                </div>
+
+                <div class="card">
+                    <div class="card-header"><span class="card-title">Current Candidates</span></div>
+                    <div class="table-wrap">
+                        <table>
+                            <thead>
+                                <tr>
+                                    <th>ID</th><th>Name</th><th>Party</th><th>Votes</th><th>Action</th>
+                                </tr>
+                            </thead>
+                            <tbody id="candidatesTable"><tr><td colspan="5" style="color:var(--muted)">Loading…</td></tr></tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Results -->
+            <div class="section" id="sec-results">
+                <div class="page-header">
+                    <h2>Detailed Results</h2>
+                    <p>Full vote breakdown for all candidates.</p>
+                </div>
+                <div class="card">
+                    <div class="card-header">
+                        <span class="card-title">Vote Standings</span>
+                        <button class="btn btn-sm" onclick="loadResults()">↺ Refresh</button>
+                    </div>
+                    <div id="detailedResults"></div>
+                </div>
+            </div>
+
+        </main>
+    </div>
+
+    <!-- Toast -->
+    <div class="toast" id="toast"></div>
+
+    <script>
+        function showSection(name, el) {
+            document.querySelectorAll('.section').forEach(s => s.classList.remove('active'));
+            document.getElementById('sec-' + name).classList.add('active');
+            document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
+            if (el) el.classList.add('active');
+            if (name === 'users')      loadUsers();
+            if (name === 'candidates') loadCandidates();
+            if (name === 'results')    loadResults();
+        }
+
+        async function loadStats() {
+            const [usersRes, candidatesRes, resultsRes] = await Promise.all([
+                fetch('/api/admin/users'),
+                fetch('/api/candidates'),
+                fetch('/api/results')
+            ]);
+            const users      = await usersRes.json();
+            const candidates = await candidatesRes.json();
+            const results    = await resultsRes.json();
+
+            document.getElementById('statUsers').textContent      = users.length;
+            document.getElementById('statCandidates').textContent = candidates.length;
+            document.getElementById('statVotes').textContent      = results.reduce((s,c)=>s+c.votes,0);
+
+            // Overview results
+            const total = results.reduce((s,c)=>s+c.votes,0);
+            const el    = document.getElementById('overviewResults');
+            el.innerHTML = '';
+            results.forEach(c => {
+                const pct = total > 0 ? Math.round((c.votes/total)*100) : 0;
+                el.innerHTML += `
+                    <div class="result-item">
+                        <div class="result-header">
+                            <span class="cname">${c.name}</span>
+                            <span class="votes-count">${c.votes} votes · ${pct}%</span>
+                        </div>
+                        <div class="progress-bar">
+                            <div class="progress-fill" style="width:${pct}%"></div>
+                        </div>
+                    </div>`;
+            });
+        }
+
+        async function loadUsers() {
+            const tbody = document.getElementById('usersTable');
+            try {
+                const res   = await fetch('/api/admin/users');
+                const users = await res.json();
+                tbody.innerHTML = '';
+                users.forEach(u => {
+                    const date = new Date(u.created_at).toLocaleDateString();
+                    tbody.innerHTML += `
+                        <tr>
+                            <td>${u.id}</td>
+                            <td>${u.username}</td>
+                            <td>${u.email}</td>
+                            <td><span class="badge badge-${u.role}">${u.role}</span></td>
+                            <td>${date}</td>
+                            <td>${u.role !== 'admin' ? `<button class="btn btn-danger" onclick="deleteUser(${u.id})">Delete</button>` : '—'}</td>
+                        </tr>`;
+                });
+            } catch {
+                tbody.innerHTML = '<tr><td colspan="6" style="color:var(--danger)">Failed to load.</td></tr>';
+            }
+        }
+
+        async function deleteUser(id) {
+            if (!confirm('Delete this user?')) return;
+            const res = await fetch(`/api/admin/users/${id}`, { method: 'DELETE' });
+            if ((await res.json()).success) { showToast('User deleted.', 'success'); loadUsers(); }
+        }
+
+        async function loadCandidates() {
+            const tbody = document.getElementById('candidatesTable');
+            try {
+                const res  = await fetch('/api/candidates');
+                const list = await res.json();
+                tbody.innerHTML = '';
+                list.forEach(c => {
+                    tbody.innerHTML += `
+                        <tr>
+                            <td>${c.id}</td>
+                            <td>${c.name}</td>
+                            <td>${c.party}</td>
+                            <td>${c.votes}</td>
+                            <td><button class="btn btn-danger" onclick="deleteCandidate(${c.id})">Delete</button></td>
+                        </tr>`;
+                });
+            } catch {
+                tbody.innerHTML = '<tr><td colspan="5" style="color:var(--danger)">Failed to load.</td></tr>';
+            }
+        }
+
+        async function addCandidate() {
+            const name = document.getElementById('cName').value.trim();
+            const party = document.getElementById('cParty').value.trim();
+            const description = document.getElementById('cDesc').value.trim();
+            if (!name || !party) return showToast('Name and party are required.', 'error');
+            const res  = await fetch('/api/admin/candidates', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ name, party, description })
+            });
+            if ((await res.json()).success) {
+                showToast('Candidate added!', 'success');
+                document.getElementById('cName').value = '';
+                document.getElementById('cParty').value = '';
+                document.getElementById('cDesc').value = '';
+                loadCandidates();
+            }
+        }
+
+        async function deleteCandidate(id) {
+            if (!confirm('Delete this candidate?')) return;
+            const res = await fetch(`/api/admin/candidates/${id}`, { method: 'DELETE' });
+            if ((await res.json()).success) { showToast('Candidate removed.', 'success'); loadCandidates(); }
+        }
+
+        async function loadResults() {
+            const el = document.getElementById('detailedResults');
+            const res  = await fetch('/api/results');
+            const list = await res.json();
+            const total = list.reduce((s,c)=>s+c.votes,0);
+            el.innerHTML = '';
+            list.forEach(c => {
+                const pct = total > 0 ? Math.round((c.votes/total)*100) : 0;
+                el.innerHTML += `
+                    <div class="result-item">
+                        <div class="result-header">
+                            <span class="cname">${c.name} <span style="color:var(--muted);font-weight:400">(${c.party})</span></span>
+                            <span class="votes-count">${c.votes} votes · ${pct}%</span>
+                        </div>
+                        <div class="progress-bar">
+                            <div class="progress-fill" style="width:${pct}%"></div>
+                        </div>
+                    </div>`;
+            });
+        }
+
+        async function resetVotes() {
+            if (!confirm('Reset ALL votes? This cannot be undone.')) return;
+            const res = await fetch('/api/admin/reset-votes', { method: 'POST' });
+            if ((await res.json()).success) { showToast('All votes reset.', 'success'); loadStats(); }
+        }
+
+        function showToast(msg, type) {
+            const t = document.getElementById('toast');
+            t.textContent = msg;
+            t.className   = `toast ${type} show`;
+            setTimeout(() => t.classList.remove('show'), 3000);
+        }
+
+        loadStats();
+    </script>
+</body>
+</html>
