@@ -48,7 +48,7 @@ This version contains **6 intentional security vulnerabilities**. Each one can b
 1. Go to `http://localhost:4000`
 2. In the **Email** field enter exactly:
 ```
-admin@vote.com' OR '1'='1' --
+' OR 1=1# 
 ```
 3. In the **Password** field enter anything (e.g. `wrongpassword`)
 4. Click **Sign In**
