@@ -69,9 +69,17 @@ The `OR '1'='1'` always evaluates to true and `--` comments out the password che
 1. Go to `http://localhost:4000/register`
 2. In the **Full Name** field enter:
 ```
-test'), ('hacker', 'hacker@evil.com', 'hacked', 'admin
+hacker
 ```
-3. Fill email and password with anything and click **Create Account**
+3. Fill email:
+```
+hacker@test.com
+```
+password  
+```
+pass123', 'admin') -- 
+```
+Then click **Create Account**
 
 **What happens:** The injected payload closes the original INSERT statement and appends a second one, creating a hidden admin account (`hacker@evil.com`) in the database directly.
 
