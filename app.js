@@ -231,17 +231,26 @@ app.post('/register', (req, res) => {
     return res.status(400).json({ error: 'Invalid characters detected.' });
     }
 
-    // SQL Injection in Registration Form(Unsanitized User Input) - Fixed using parameterized query
-    const query = "INSERT INTO users (username, email, password, role) VALUES (?, ?, ?, 'voter')";
+    // Check duplicate email
+    db.query('SELECT id FROM users WHERE email = ?', [email], (err, results) => {
+        if (err) return res.status(500).json({ error: 'Database error.' });
 
-    // Plain Text Password Storage - Password Hashing(Password is hashed before storing in database)
-    bcrypt.hash(password, 10, (err, hashedPassword) => {
-      if (err) return res.status(500).json({ error: 'Hashing failed.' });
+        if (results.length > 0) {
+            return res.status(400).json({ error: 'Email already registered.' });
+        }
 
-      db.query(query, [username, email, hashedPassword], (err) => {
-        if (err) return res.status(500).json({ error: 'Registration failed.' });
-        res.json({ success: true, message: 'Registered successfully!' });
-      });
+        // SQL Injection in Registration Form(Unsanitized User Input) - Fixed using parameterized query
+        const query = "INSERT INTO users (username, email, password, role) VALUES (?, ?, ?, 'voter')";
+
+        // Plain Text Password Storage - Password Hashing(Password is hashed before storing in database)
+        bcrypt.hash(password, 10, (err, hashedPassword) => {
+            if (err) return res.status(500).json({ error: 'Hashing failed.' });
+
+            db.query(query, [username, email, hashedPassword], (err) => {
+                if (err) return res.status(500).json({ error: 'Registration failed.' });
+                res.json({ success: true, message: 'Registered successfully!' });
+            });
+        });
     });
 });
 
