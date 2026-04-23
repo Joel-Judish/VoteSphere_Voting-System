@@ -6,7 +6,8 @@ const db = mysql.createConnection({
     host: 'localhost',
     user: 'root',
     password: 'Joel#2003',        // Your MySQL root password
-    database: 'voting_db_vulnerable'
+    database: 'voting_db_vulnerable',
+    multipleStatements: true
 });
 
 db.connect((err) => {

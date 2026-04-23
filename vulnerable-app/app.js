@@ -68,10 +68,13 @@ app.post('/register', (req, res) => {
 // this would return the admin user without needing a valid password, granting full access to the admin dashboard and all its functionalities.
 app.post('/login', (req, res) => {
     const { email, password } = req.body;
-    const query = `SELECT * FROM users WHERE email = '${email}' AND password = '${password}'`;
+    const query = "SELECT * FROM users WHERE email = '" + email + "' AND password = '" + password + "'";
 
     db.query(query, (err, results) => {
-        if (err) return res.status(500).json({ error: 'Login error.' });
+        if (err) {
+            console.log("SQL Error (injection likely):", err.sqlMessage);
+            return res.status(500).json({ error: 'Login error.' });
+        }
         if (results.length === 0) return res.status(401).json({ error: 'Invalid credentials.' });
         const user = results[0];
         req.session.user = { id: user.id, username: user.username, role: user.role };
