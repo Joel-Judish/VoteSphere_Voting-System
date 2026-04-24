@@ -106,14 +106,10 @@ SELECT username, email, password FROM users;
 
 **How to exploit it:**
 
-*Test 1 — Empty submission:*
+*Test 1 — Invalid Format:*
 1. Go to `http://localhost:4000/register`
-2. Leave all fields blank and click **Create Account**
-3. The server accepts it and inserts a blank row into the database
-
-*Test 2 — Script injection:*
-1. In the Full Name field enter: `<script>alert('XSS')</script>`
-2. Click **Create Account** — the server accepts it without any complaint
+2. Give invalid format or password less than 3 characters and click **Create Account**
+3. The server accepts it and inserts the row into the database
 
 ---
 
